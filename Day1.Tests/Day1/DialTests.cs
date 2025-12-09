@@ -1,3 +1,4 @@
+using AOC25.Day1;
 using Xunit;
 
 namespace AOC25.Tests.Day1;
