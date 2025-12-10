@@ -10,7 +10,7 @@ public class DialTests
     {
         var dial = new Dial();
         
-        Assert.Equal(0, dial.Value);
+        Assert.Equal(0, dial.Position.Value);
     }
 
     [Fact]
@@ -18,7 +18,7 @@ public class DialTests
     {
         var dial = new Dial(50);
         
-        Assert.Equal(50, dial.Value);
+        Assert.Equal(50, dial.Position.Value);
     }
 
     [Fact]
@@ -28,7 +28,7 @@ public class DialTests
         
         dial.Rotate(5);
         
-        Assert.Equal(15, dial.Value);
+        Assert.Equal(15, dial.Position.Value);
     }
 
     [Fact]
@@ -38,7 +38,7 @@ public class DialTests
         
         dial.Rotate(-5);
         
-        Assert.Equal(15, dial.Value);
+        Assert.Equal(15, dial.Position.Value);
     }
 
     [Fact]
@@ -48,7 +48,7 @@ public class DialTests
         
         dial.Rotate(10);
         
-        Assert.Equal(5, dial.Value);
+        Assert.Equal(5, dial.Position.Value);
     }
 
     [Fact]
@@ -58,7 +58,7 @@ public class DialTests
         
         dial.Rotate(-10);
         
-        Assert.Equal(95, dial.Value);
+        Assert.Equal(95, dial.Position.Value);
     }
 
     [Fact]
@@ -68,7 +68,7 @@ public class DialTests
         
         dial.Rotate(200);
         
-        Assert.Equal(50, dial.Value);
+        Assert.Equal(50, dial.Position.Value);
     }
 
     [Fact]
@@ -78,7 +78,7 @@ public class DialTests
         
         dial.Rotate(-200);
         
-        Assert.Equal(50, dial.Value);
+        Assert.Equal(50, dial.Position.Value);
     }
 
     [Theory]
@@ -93,7 +93,7 @@ public class DialTests
         
         dial.Rotate(amount);
         
-        Assert.Equal(expected, dial.Value);
+        Assert.Equal(expected, dial.Position.Value);
     }
 
     [Fact]
@@ -103,7 +103,7 @@ public class DialTests
         
         dial.RotateRight(5);
         
-        Assert.Equal(15, dial.Value);
+        Assert.Equal(15, dial.Position.Value);
     }
 
     [Fact]
@@ -113,7 +113,7 @@ public class DialTests
         
         dial.RotateRight(10);
         
-        Assert.Equal(5, dial.Value);
+        Assert.Equal(5, dial.Position.Value);
     }
 
     [Fact]
@@ -123,7 +123,7 @@ public class DialTests
         
         dial.RotateLeft(5);
         
-        Assert.Equal(15, dial.Value);
+        Assert.Equal(15, dial.Position.Value);
     }
 
     [Fact]
@@ -133,7 +133,7 @@ public class DialTests
         
         dial.RotateLeft(10);
         
-        Assert.Equal(95, dial.Value);
+        Assert.Equal(95, dial.Position.Value);
     }
 
     [Fact]
@@ -145,7 +145,7 @@ public class DialTests
         dial.Rotate(-5);
         dial.Rotate(20);
         
-        Assert.Equal(75, dial.Value);
+        Assert.Equal(75, dial.Position.Value);
     }
 
     [Fact]
@@ -155,7 +155,7 @@ public class DialTests
         
         dial.RotateRight(-5);
         
-        Assert.Equal(15, dial.Value);
+        Assert.Equal(15, dial.Position.Value);
     }
 
     [Fact]
@@ -165,7 +165,7 @@ public class DialTests
         
         dial.RotateLeft(-5);
         
-        Assert.Equal(15, dial.Value);
+        Assert.Equal(15, dial.Position.Value);
     }
 
     [Theory]
@@ -185,7 +185,7 @@ public class DialTests
         
         dial.Rotate(amount);
         
-        Assert.InRange(dial.Value, 0, 99);
+        Assert.InRange(dial.Position.Value, 0, 99);
     }
 
     [Fact]
@@ -199,6 +199,6 @@ public class DialTests
             dial.Rotate(change);
         }
         
-        Assert.Equal(32, dial.Value);
+        Assert.Equal(32, dial.Position.Value);
     }
 }
