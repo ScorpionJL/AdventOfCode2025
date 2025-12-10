@@ -1,17 +1,15 @@
 ﻿namespace AOC25.Day1;
 
-public class Dial
+public record struct DialPosition(int Value);
+
+public static class DialPositionExtensions
 {
-    public Dial() { }
-    public Dial(int value) => Rotate(value);
-
-
-    public int Value { get; private set; }
-
-
-    public void Rotate(int amount) => Value = ((Value + amount) % 100 + 100) % 100;
-
-    public void RotateRight(int amount) => Rotate(amount);
-
-    public void RotateLeft(int amount) => Rotate(-amount);
+    extension(DialPosition dial)
+    {
+        public DialPosition RotateDial(int amount)
+        {
+            dial.Value = (((dial.Value + amount) % 100) + 100) % 100;
+            return dial;
+        }
+    }
 }

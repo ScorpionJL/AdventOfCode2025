@@ -18,20 +18,29 @@ public class Solution
     public static int Part1(IPuzzleInput puzzleInput)
     {
         int zeros = 0;
-        var dial = new Dial(50);
+        var dial = new DialPosition(50);
 
-        var rotations = puzzleInput.GetInput().Select(RotationAmount);
-        foreach (var rotation in rotations)
+
+        // foreach line in input
+        foreach (var line in puzzleInput.GetInput())
         {
-            dial.Rotate(rotation);
+            // parse line to get rotation amount
+            var rotation = RotationAmount(line);
+            if (rotation == 0) { continue; }
+
+            // if line is valid, rotate dial and new dial position
+            dial = dial.RotateDial(rotation);
             LogRotation(dial, rotation);
+
+            // if dial is at 0, increment zeros
             if (dial.Value == 0) { zeros++; }
         }
 
+        // return number of times dial was at 0
         return zeros;
     }
 
-    static void LogRotation(Dial dial, int parsedVal)
+    static void LogRotation(DialPosition dial, int parsedVal)
     {
         Console.WriteLine($"Dial changed by {parsedVal}, new position: {dial.Value}");
     }
