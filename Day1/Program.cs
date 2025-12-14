@@ -1,34 +1,14 @@
-﻿using AOC25.Day1;
+﻿using AOC25;
+using Day1 = AOC25.Day1;
 
-// 6122
+SolveDay1();
 
-//var input1 = new PuzzleInputSample();
-//var input1 = new PuzzleInputTests();
-var input1 = new PuzzleInput();
-var solution = Puzzle.Solve(input1);
-Console.WriteLine($"Part 1:  {solution.part1}");
-Console.WriteLine($"Part 2:  {solution.part2}");
-
-
-var dial = 50;
-int hits = 0;
-foreach (var line in input1.GetInput())
+static void SolveDay1()
 {
-    var dir = line[0];
-    var amount = int.Parse(line[1..]);
-    for (var i = 0; i < amount; i++)
-    {
-        if (dir == 'L')
-        {
-            dial = (dial - 1 + 100) % 100;
-        }
-        else
-        {
-            dial = (dial + 1) % 100;
-        }
-
-        if (dial == 0) { hits += 1; }
-    }
-    //System.Diagnostics.Debug.WriteLine($"Direction: {dir}, Rotation: {amount}, New Dial: {dial}");
+    IPuzzleInput input = PuzzleInput.Create(1);
+    var (part1, part2) = Day1.Puzzle.Solve(input);
+    Console.WriteLine($"""
+    Part 1:  {part1}
+    Part 2:  {part2}
+    """);
 }
-Console.WriteLine(hits);

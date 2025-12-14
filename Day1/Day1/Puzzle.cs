@@ -1,6 +1,4 @@
-﻿using System.Numerics;
-
-namespace AOC25.Day1;
+﻿namespace AOC25.Day1;
 
 public static class Puzzle
 {
@@ -13,7 +11,7 @@ public static class Puzzle
         int hitZero = 0;
 
         // foreach line in input
-        foreach (var line in puzzleInput.GetInput())
+        foreach (var line in puzzleInput.ReadInput())
         {
             if (line.Length < 2) { continue; }
 
@@ -23,32 +21,27 @@ public static class Puzzle
             int rotation = int.TryParse(line[1..], out var parsed) ? parsed : 0;
             if (rotation == 0) { continue; }
 
+            // transform dial for left turns
+            if (direction is 'L' && dial is not 0 or 50) { dial = 100 - dial; }
 
-            var absoluteDial = (direction == 'L' && dial != 0)
-                ? 100 - dial
-                : dial;
+            // apply full rotation
+            dial += rotation;
 
-            hitZero += (absoluteDial + rotation) / dialRange;
+            // count the times zero is passed
+            hitZero += dial / dialRange;
 
-            dial = direction == 'R'
-                ? (dial + rotation) % dialRange
-                : (dial - rotation + dialRange) % dialRange;
+            // normalize dial back into range
+            dial = dial % dialRange;
 
+            // transform dial back for left turns
+            if (direction is 'L' && dial is not 0 or 50) { dial = 100 - dial; }
+
+            // check if we ended on zero
             if (dial == 0) { endZero++; }
-            Console.WriteLine($"Direction: {direction}, Rotation: {rotation}, New Dial: {dial}");
+
+            //Console.WriteLine($"Direction: {direction}, Rotation: {rotation}, New Dial: {dial}");
         }
 
         return (endZero, hitZero);
-    }
-}
-
-file static class NumberExtensions
-{
-    extension<T>(T value) where T : INumber<T>
-    {
-        public T Modulo(T modulus) =>
-            T.IsZero(modulus)
-            ? throw new DivideByZeroException()
-            : (value % modulus + modulus) % modulus;
     }
 }
