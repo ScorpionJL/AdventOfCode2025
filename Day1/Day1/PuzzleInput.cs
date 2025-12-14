@@ -16,7 +16,7 @@ public class PuzzleInputTests : IPuzzleInput
 
             R150
             R50
-            """;
+        """;
         return input.Split(Environment.NewLine);
     }
 }
