@@ -5,23 +5,41 @@ public interface IPuzzleInput
     IEnumerable<string> GetInput();
 }
 
-public class PuzzleInputSample : IPuzzleInput
+public class FileInput : IPuzzleInput
 {
-    private static readonly string SAMPLE_INPUT = @"""
-        L68
-        L30
-        R48
-        L5
-        R60
-        L55
-        L1
-        L99
-        R14
-        L82
-        """;
+    private readonly string _inputFilePath;
 
-    public IEnumerable<string> GetInput()
+    public FileInput(string inputFilePath) => _inputFilePath = inputFilePath;
+
+    public IEnumerable<string> GetInput() => File.ReadLines(_inputFilePath);
+}
+
+public class PuzzleInputSample : FileInput
+{
+    public PuzzleInputSample() : base(@"day1\input-sample.txt") { }
+}
+
+public class PuzzleInput : FileInput
+{
+    public PuzzleInput() : base(@"day1\input.txt") { }
+}
+
+public class PuzzleInputTests : IPuzzleInput
+{    public IEnumerable<string> GetInput()
     {
-        return SAMPLE_INPUT.Split(["\r\n", "\r", "\n"], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        string input = """
+            L150
+            L50
+
+            L150
+            R50
+
+            R150
+            L50
+
+            R150
+            R50
+            """;
+        return input.Split(Environment.NewLine);
     }
 }
