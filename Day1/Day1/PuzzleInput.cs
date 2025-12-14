@@ -1,7 +1,8 @@
 ﻿namespace AOC25.Day1;
 
 public class PuzzleInputTests : IPuzzleInput
-{    public IEnumerable<string> ReadInput()
+{
+    public IEnumerable<string> ReadInput()
     {
         string input = """
             L150

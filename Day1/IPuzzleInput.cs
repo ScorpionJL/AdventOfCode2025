@@ -16,6 +16,6 @@ public class FileInput : IPuzzleInput
 
 public static class PuzzleInput
 {
-    public static IPuzzleInput Create(int day, bool sample = false) => 
+    public static IPuzzleInput Create(int day, bool sample = false) =>
         new FileInput($@"day{day}\input{(sample ? "-sample" : "")}.txt");
 }
