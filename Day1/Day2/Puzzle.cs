@@ -1,97 +1,69 @@
 ﻿namespace AOC25.Day2;
 
-using System;
-using AOC25;
-
 public static class Puzzle
 {
-    public static (int part1, int part2) Solve(IPuzzleInput puzzleInput)
+    private record struct NumericRange(long Start, long End);
+
+    public static (long part1, long part2) Solve(IPuzzleInput puzzleInput)
     {
-        ArgumentNullException.ThrowIfNull(puzzleInput);
+        var part1 = 0L;
+        var part2 = 0L;
 
-        foreach (var line in puzzleInput.ReadInput())
+        var input = puzzleInput.LoadInput().AsSpan();
+        foreach (var range in input.Split(','))
         {
-            if (string.IsNullOrWhiteSpace(line))
-                continue;
-
-            ReadOnlySpan<char> s = line.AsSpan();
-            int len = s.Length;
-            int i = 0;
-
-            while (i < len)
-            {
-                // parse start id
-                int start = 0;
-                bool hasDigits = false;
-                while (i < len)
-                {
-                    char c = s[i];
-                    if (c >= '0' && c <= '9')
-                    {
-                        start = start * 10 + (c - '0');
-                        hasDigits = true;
-                        i++;
-                        continue;
-                    }
-
-                    if (c == '-')
-                    {
-                        i++; // consume '-'
-                        break;
-                    }
-
-                    // skip unexpected characters
-                    i++;
-                }
-
-                if (!hasDigits)
-                    break;
-
-                // parse end id
-                int end = 0;
-                bool hasEndDigits = false;
-                while (i < len)
-                {
-                    char c = s[i];
-                    if (c >= '0' && c <= '9')
-                    {
-                        end = end * 10 + (c - '0');
-                        hasEndDigits = true;
-                        i++;
-                        continue;
-                    }
-
-                    if (c == ',')
-                    {
-                        i++; // consume ',' and move to next range
-                        break;
-                    }
-
-                    // skip unexpected characters
-                    i++;
-                }
-
-                if (!hasEndDigits)
-                    break;
-
-                // enumerate and print ids in range (inclusive). Handles descending ranges too.
-                if (start <= end)
-                {
-                    for (int v = start; v <= end; v++)
-                    {
-                        Console.WriteLine(v);
-                    }
-                }
-                else
-                {
-                    for (int v = start; v >= end; v--)
-                    {
-                        Console.WriteLine(v);
-                    }
-                }
-            }
+            part1 += input[range]
+                .ParseRangeValues()
+                .ExpandRange()
+                .Where(ValueIsInvalid)
+                .Sum();
         }
 
-        return (0, 0);
+        // 28846518423
+        return (part1, part2);
+    }
+
+    private static bool ValueIsInvalid(long num)
+    {
+        // get the number of digits in the value
+        var digits = num.Digits;
+
+        // must be an even number of digits to have a sequence repeated twice
+        var (half, remainder) = Math.DivRem(digits, 2);
+        if (remainder != 0) { return false; }
+
+        // split the number into two equal parts
+        var multiplier = (long)Math.Pow(10, half);
+        var (firstHalf, secondHalf) = Math.DivRem(num, multiplier);
+
+        // number is invalid if the both parts match
+        return (firstHalf == secondHalf);
+    }
+
+    
+    extension(ReadOnlySpan<char> range)
+    {
+        private NumericRange ParseRangeValues()
+        {
+            var dash = range.Trim().IndexOf('-');
+            return
+                dash <= 0 ||
+                !long.TryParse(range[..dash], out long first) ||
+                !long.TryParse(range[(dash + 1)..], out long last)
+                ? new NumericRange(0, 0) : new NumericRange(first, last);
+        }
+    }
+
+    extension(NumericRange source)
+    {
+        IEnumerable<long> ExpandRange()
+        {
+            for (long num = source.Start; num < source.End; num++) { yield return num; }
+        }
+    }
+
+    extension(long number)
+    {
+        long Digits => number == 0 ? 1 : (long)Math.Floor(Math.Log10(Math.Abs(number))) + 1;
     }
 }
