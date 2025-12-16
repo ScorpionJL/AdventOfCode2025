@@ -10,14 +10,14 @@ public static class Puzzle
         var part2 = 0L;
 
         var input = puzzleInput.LoadInput().AsSpan();
-        //foreach (var range in input.Split(','))
-        //{
-        //    part1 += input[range]
-        //        .ParseRangeValues()
-        //        .ExpandRange()
-        //        .Where(ValueIsInvalid)
-        //        .Sum();
-        //}
+        foreach (var range in input.Split(','))
+        {
+            part1 += input[range]
+                .ParseRangeValues()
+                .ExpandRange()
+                .Where(ValueIsInvalid)
+                .Sum();
+        }
 
         foreach (var range in input.Split(','))
         {
@@ -28,7 +28,7 @@ public static class Puzzle
                 .Sum();
         }
 
-        // 28846518423
+        // 28846518423, 31578210022
         return (part1, part2);
     }
 
@@ -37,11 +37,14 @@ public static class Puzzle
         // get the number of digits in the value
         var digits = num.Digits;
 
-        for (var patternLength = 1; patternLength < digits; patternLength++)
+        for (var sequenceLength = 1; sequenceLength < digits; sequenceLength++)
         {
-            if (CheckForSequence(num, digits, patternLength))
+            // must be able to split the number up evenly
+            if (digits % sequenceLength != 0) { continue; } 
+
+            if (CheckForSequence(num, sequenceLength))
             {
-                Console.WriteLine($"*{num}");
+                Console.WriteLine($"**{num}");
                 return true;
             }
         }
@@ -49,17 +52,18 @@ public static class Puzzle
         return false;
     }
 
-    private static bool CheckForSequence(long num, long numDigits, long patternLength)
+    private static bool CheckForSequence(long num, long sequenceLength)
     {
-        if (patternLength >= numDigits) { return false; }
+        var multiplier = (long)Math.Pow(10, sequenceLength);
 
-        var multiplier = (long)Math.Pow(10, numDigits - patternLength);
-        var (sequence, value) = Math.DivRem(num, multiplier);
-        value = value % multiplier;
+        (num, var target) = Math.DivRem(num, multiplier);
+        while (num > 0)
+        {
+            (num, var sequence) = Math.DivRem(num, multiplier);
+            if (sequence != target) { return false; }
+        }
 
-        if (sequence == value) { return true; }
-
-        return false;
+        return true;
     }
 
 
@@ -85,7 +89,7 @@ public static class Puzzle
     {
         private NumericRange ParseRangeValues()
         {
-            Console.WriteLine(range);
+            //Console.WriteLine(range);
             var dash = range.Trim().IndexOf('-');
             return
                 dash <= 0 ||
