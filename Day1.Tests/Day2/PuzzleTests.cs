@@ -13,6 +13,6 @@ public class PuzzleTests
         var (part1, part2) = Puzzle.Solve(input);
 
         Assert.Equal(1227775554, part1);
-        Assert.Equal(0, part2);
+        Assert.Equal(4174379265, part2);
     }
 }

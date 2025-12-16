@@ -10,18 +10,58 @@ public static class Puzzle
         var part2 = 0L;
 
         var input = puzzleInput.LoadInput().AsSpan();
+        //foreach (var range in input.Split(','))
+        //{
+        //    part1 += input[range]
+        //        .ParseRangeValues()
+        //        .ExpandRange()
+        //        .Where(ValueIsInvalid)
+        //        .Sum();
+        //}
+
         foreach (var range in input.Split(','))
         {
-            part1 += input[range]
+            part2 += input[range]
                 .ParseRangeValues()
                 .ExpandRange()
-                .Where(ValueIsInvalid)
+                .Where(ValueRepeats)
                 .Sum();
         }
 
         // 28846518423
         return (part1, part2);
     }
+
+    private static bool ValueRepeats(long num)
+    {
+        // get the number of digits in the value
+        var digits = num.Digits;
+
+        for (var patternLength = 1; patternLength < digits; patternLength++)
+        {
+            if (CheckForSequence(num, digits, patternLength))
+            {
+                Console.WriteLine($"*{num}");
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static bool CheckForSequence(long num, long numDigits, long patternLength)
+    {
+        if (patternLength >= numDigits) { return false; }
+
+        var multiplier = (long)Math.Pow(10, numDigits - patternLength);
+        var (sequence, value) = Math.DivRem(num, multiplier);
+        value = value % multiplier;
+
+        if (sequence == value) { return true; }
+
+        return false;
+    }
+
 
     private static bool ValueIsInvalid(long num)
     {
@@ -40,11 +80,12 @@ public static class Puzzle
         return (firstHalf == secondHalf);
     }
 
-    
+
     extension(ReadOnlySpan<char> range)
     {
         private NumericRange ParseRangeValues()
         {
+            Console.WriteLine(range);
             var dash = range.Trim().IndexOf('-');
             return
                 dash <= 0 ||
@@ -58,7 +99,7 @@ public static class Puzzle
     {
         IEnumerable<long> ExpandRange()
         {
-            for (long num = source.Start; num < source.End; num++) { yield return num; }
+            for (long num = source.Start; num < source.End + 1; num++) { yield return num; }
         }
     }
 
