@@ -4,23 +4,30 @@ public static class Puzzle
 {
     public static (long part1, long part2) Solve(IPuzzleInput puzzleInput)
     {
-        var part1 = puzzleInput.ReadInput()
-            .Select(CalculateJoltage)
-            .Sum();
+        var result = puzzleInput.ReadInput()
+            .Select(CalculateJoltages)
+            .Aggregate(
+                (low: 0L, high: 0L),
+                (state, joltage) =>
+                {
+                    state.low += joltage.low;
+                    state.high += joltage.high;
+                    return state;
+                });
 
-        var part2 = puzzleInput.ReadInput()
-            .Select(CalculateHighJoltage)
-            .Sum();
-
-        return (part1, part2);
+        return (result.low, result.high);
     }
 
-    public static long CalculateJoltage(string line)
+    private static (long low, long high) CalculateJoltages(string line)
     {
         var span = line.AsSpan();
-        long value = long.Parse(span[^2..]);
+        return (CalculateJoltage(span), CalculateHighJoltage(span));
+    }
 
-        // loop through the span in reverse except last two chars and print the char to the console
+    private static long CalculateJoltage(ReadOnlySpan<char> span)
+    {
+        var value = long.Parse(span[^2..]);
+
         for (var i = span.Length - 3; i >= 0; i--)
         {
             long digit = span[i] - '0';
@@ -35,9 +42,8 @@ public static class Puzzle
         return value;
     }
 
-    public static long CalculateHighJoltage(string line)
+    private static long CalculateHighJoltage(ReadOnlySpan<char> span)
     {
-        var span = line.AsSpan();
         var joltage = span[^12..].ToArray();
 
         for (var i = span.Length - 13; i >= 0; i--)

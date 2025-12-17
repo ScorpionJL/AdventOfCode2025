@@ -1,4 +1,6 @@
-﻿using AOC25;
+﻿#pragma warning disable CS8321 // Local function is declared but never used
+
+using AOC25;
 using Day1 = AOC25.Day1;
 using Day2 = AOC25.Day2;
 using Day3 = AOC25.Day3;
