@@ -2,7 +2,9 @@
 
 public interface IPuzzleInput
 {
-    IEnumerable<string> ReadInput();
+    IEnumerable<string> ReadInput() => [];
+
+    string LoadInput() => string.Empty;
 }
 
 public class FileInput : IPuzzleInput
@@ -12,6 +14,8 @@ public class FileInput : IPuzzleInput
     public FileInput(string inputFilePath) => _inputFilePath = inputFilePath;
 
     public IEnumerable<string> ReadInput() => File.ReadLines(_inputFilePath);
+
+    public string LoadInput() => File.ReadAllText(_inputFilePath);
 }
 
 public static class PuzzleInput
