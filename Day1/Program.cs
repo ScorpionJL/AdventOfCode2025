@@ -29,7 +29,7 @@ static void SolveDay2()
 
 static void SolveDay3()
 {
-    IPuzzleInput input = PuzzleInput.Create(3, true);
+    IPuzzleInput input = PuzzleInput.Create(3);
     var (part1, part2) = Day3.Puzzle.Solve(input);
     Console.WriteLine($"""
     Part 1:  {part1}
