@@ -1,80 +1,81 @@
 ﻿namespace AOC25.Day4;
 
+using Grid = char[][];
+
 public static class Puzzle
 {
-    readonly record struct Coordinate(int row, int col);
+    readonly record struct Coordinate(int Row, int Col);
 
-    public static (long part1, long part2) Solve(IPuzzleInput puzzleInput)
+    public static (int part1, int part2) Solve(IPuzzleInput puzzleInput)
     {
+        var part1 = 0;
+        var part2 = 0;
+
+        // read the input as a grid
         var grid = puzzleInput.ReadInput()
             .Select(line => line.ToCharArray())
             .ToArray();
         var rows = grid.Length;
         var cols = grid[0].Length;
 
+        // use to enumerate over the grid coordinates
         var coords =
             Enumerable.Range(0, rows).SelectMany(row =>
             Enumerable.Range(0, cols), (row, col) => new Coordinate(row, col));
 
-        var part1 = 0;
-        var part2 = 0;
+        // first pass gets the number of cells containing paper that can be moved
+        var paperToRemove = grid.CanMovePaper(coords, rows, cols).ToList();
+        part1 = paperToRemove.Count;
 
-        List<Coordinate> movedPaper = [];
-        foreach (var coord in CanMovePaper(coords, grid, rows, cols)) { movedPaper.Add(coord); }
-
-        part1 = movedPaper.Count;
-        while (movedPaper.Count > 0)
+        // subsequent passes remove the paper and repeat the process
+        while (paperToRemove.Count > 0)
         {
-            part2 += movedPaper.Count;
-
-            MovePaper(movedPaper, grid);
-            movedPaper.Clear();
-
-            foreach (var coord in CanMovePaper(coords, grid, rows, cols)) { movedPaper.Add(coord); }
+            part2 += paperToRemove.Count;
+            grid.RemovePaper(paperToRemove);
+            paperToRemove = [.. grid.CanMovePaper(coords, rows, cols)];
         }
 
         return (part1, part2);
     }
 
-    private const char PaperRollSymble = '@';
 
-    private static readonly Coordinate[] borderCells =
+    private const char PAPER_ROLL_SYMBOL = '@';
+
+    private static readonly Coordinate[] BorderCells =
     [
         new(-1, -1), new(-1, +0), new(-1, +1),
         new(+0, -1),              new(+0, +1),
         new(+1, -1), new(+1, +0), new(+1, +1)
     ];
 
-    private static bool IsPaperRoll(this Coordinate position, char[][] grid) => grid[position.row][position.col] == PaperRollSymble;
 
-    private static int PaperBorderCellCount(this Coordinate position, char[][] grid, int maxRows, int maxCols)
+    extension(Grid grid)
     {
-        int result = 0;
-        foreach (var cell in borderCells)
-        {
-            if (position.row + cell.row < 0) { continue; }
-            if (position.row + cell.row >= maxRows) { continue; }
-            if (position.col + cell.col < 0) { continue; }
-            if (position.col + cell.col >= maxCols) { continue; }
-            result += grid[position.row + cell.row][position.col + cell.col] == PaperRollSymble ? 1 : 0;
-        }
-        return result;
-    }
+        private bool IsPaperRoll(Coordinate pos) => grid[pos.Row][pos.Col] == PAPER_ROLL_SYMBOL;
 
-    private static IEnumerable<Coordinate> CanMovePaper(IEnumerable<Coordinate> coords, char[][] grid, int maxRows, int maxCols)
-    {
-        foreach (var coord in coords)
+        private IEnumerable<Coordinate> CanMovePaper(IEnumerable<Coordinate> coords, int maxRows, int maxCols) => coords
+            .Where(grid.IsPaperRoll)
+            .Where(coord => grid.PaperBorderCellCount(coord, maxRows, maxCols) < 4);
+
+        private int PaperBorderCellCount(Coordinate origin, int maxRows, int maxCols) => BorderCells
+            .Select(offset => origin.ApplyOffset(offset))
+            .Where(coord => coord.IsValidCoordinate(maxRows, maxCols))
+            .Where(grid.IsPaperRoll)
+            .Count();
+
+        private void RemovePaper(IEnumerable<Coordinate> coordinates)
         {
-            if (coord.IsPaperRoll(grid))
-            {
-                var borders = PaperBorderCellCount(coord, grid, maxRows, maxCols);
-                if (borders < 4) { yield return coord; }
-            }
+            foreach (var coord in coordinates) { grid[coord.Row][coord.Col] = '.'; }
         }
     }
 
-    private static void MovePaper(List<Coordinate> movedPaper, char[][] grid)
+
+    extension(Coordinate coord)
     {
-        foreach (var coord in movedPaper) { grid[coord.row][coord.col] = '.'; }
+        private bool IsValidCoordinate(int maxRows, int maxCols) =>
+            coord.Row >= 0 && coord.Row < maxRows && coord.Col >= 0 && coord.Col < maxCols;
+
+        private Coordinate ApplyOffset(Coordinate offset) =>
+            new(coord.Row + offset.Row, coord.Col + offset.Col);
     }
 }
