@@ -6,6 +6,15 @@ public static class Puzzle
 {
     private record struct NumericRange<T>(T Start, T End) where T : INumber<T>;
 
+    private class NumericRangeComparer<T> : IComparer<NumericRange<T>> where T : INumber<T>
+    {
+        public int Compare(NumericRange<T> x, NumericRange<T> y)
+        {
+            var compare = x.Start.CompareTo(y.Start);
+            return compare == 0 ? x.End.CompareTo(y.End) : compare;
+        }
+    }
+
 
     public static (long part1, long part2) Solve(IPuzzleInput puzzleInput)
     {
@@ -13,8 +22,34 @@ public static class Puzzle
 
         // find the count of ids that fall within any of the ranges
         long part1 = ids.AsParallel().Count(id => ranges.Any(range => range.Start <= id && id <= range.End));
-        long part2 = 0;
+        long part2 = GetTotalRangeSize(ranges);
         return (part1, part2);
+    }
+
+    private static long GetTotalRangeSize(HashSet<NumericRange<long>> ranges)
+    {
+        var sorted = ranges.ToList();
+        sorted.Sort(new NumericRangeComparer<long>());
+
+        long count = 0;
+        NumericRange<long> current = sorted[0];
+        foreach (var range in sorted.Skip(1))
+        {
+            if (range.Start > current.End)
+            {
+                count += current.End - current.Start + 1;
+                current = range;
+                continue;
+            }
+
+            if (range.End > current.End)
+            {
+                current.End = range.End;
+            }
+        }
+        count += current.End - current.Start; // add last working range and remove 0,0 starting range (hence no +1)
+
+        return count;
     }
 
 
@@ -54,13 +89,16 @@ public static class Puzzle
         }
     }
 
-    private static NumericRange<T> ParseRangeValues<T>(this ReadOnlySpan<char> range) where T : INumber<T>
+    extension(ReadOnlySpan<char> range)
     {
-        var dash = range.Trim().IndexOf('-');
-        return
-            dash <= 0 ||
-            !T.TryParse(range[..dash], null, out var first) ||
-            !T.TryParse(range[(dash + 1)..], null, out var last)
-            ? new(T.Zero, T.Zero) : new(first, last);
+        private NumericRange<T> ParseRangeValues<T>() where T : INumber<T>
+        {
+            var dash = range.Trim().IndexOf('-');
+            return
+                dash <= 0 ||
+                !T.TryParse(range[..dash], null, out var first) ||
+                !T.TryParse(range[(dash + 1)..], null, out var last)
+                ? new(T.Zero, T.Zero) : new(first, last);
+        }
     }
 }
