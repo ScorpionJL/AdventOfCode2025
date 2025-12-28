@@ -1,55 +1,37 @@
 ﻿using System.Numerics;
+using AOC25.Common;
 
 namespace AOC25.Day5;
 
 public static class Puzzle
 {
-    private record struct NumericRange<T>(T Start, T End) where T : INumber<T>;
-
-    private class NumericRangeComparer<T> : IComparer<NumericRange<T>> where T : INumber<T>
-    {
-        public int Compare(NumericRange<T> x, NumericRange<T> y)
-        {
-            var compare = x.Start.CompareTo(y.Start);
-            return compare == 0 ? x.End.CompareTo(y.End) : compare;
-        }
-    }
-
-
     public static (long part1, long part2) Solve(IPuzzleInput puzzleInput)
     {
         var (ranges, ids) = puzzleInput.ParseInput();
 
         // find the count of ids that fall within any of the ranges
-        long part1 = ids.AsParallel().Count(id => ranges.Any(range => range.Start <= id && id <= range.End));
-        long part2 = GetTotalRangeSize(ranges);
+        long part1 = ids.Count(id => IsFreshIngredient(id, ranges));
+        long part2 = ranges.MergeOverlappingRanges().Sum(range => range.RangeSize);
+
         return (part1, part2);
     }
 
-    private static long GetTotalRangeSize(HashSet<NumericRange<long>> ranges)
-    {
-        var sorted = ranges.ToList();
-        sorted.Sort(new NumericRangeComparer<long>());
+    private static bool IsFreshIngredient(long ingredient, HashSet<NumericRange<long>> ranges) => 
+        ranges.Any(range => range.IsInRange(ingredient));
 
-        long count = 0;
-        NumericRange<long> current = sorted[0];
+    private static IEnumerable<NumericRange<long>> MergeOverlappingRanges(this HashSet<NumericRange<long>> ranges)
+    {
+        var sorted = ranges.ToSortedList();
+        var current = sorted[0];
         foreach (var range in sorted.Skip(1))
         {
-            if (range.Start > current.End)
-            {
-                count += current.End - current.Start + 1;
-                current = range;
-                continue;
-            }
-
-            if (range.End > current.End)
-            {
-                current.End = range.End;
-            }
+            if (range.Overlaps(current)) { current = ExtendRange(current, range); }
+            else { yield return current; current = range; }
         }
-        count += current.End - current.Start; // add last working range and remove 0,0 starting range (hence no +1)
+        yield return current; // yield last working range
 
-        return count;
+        static NumericRange<long> ExtendRange(NumericRange<long> current, NumericRange<long> range) =>
+            new(Math.Min(current.Start, range.Start), Math.Max(current.End, range.End));
     }
 
 
@@ -91,7 +73,7 @@ public static class Puzzle
 
     extension(ReadOnlySpan<char> range)
     {
-        private NumericRange<T> ParseRangeValues<T>() where T : INumber<T>
+        private NumericRange<T> ParseRangeValues<T>() where T : IBinaryInteger<T>
         {
             var dash = range.Trim().IndexOf('-');
             return
@@ -101,4 +83,8 @@ public static class Puzzle
                 ? new(T.Zero, T.Zero) : new(first, last);
         }
     }
+
+    private static List<T> ToSortedList<T>(this IEnumerable<T> source) => source.ToList().SortList();
+
+    private static List<T> SortList<T>(this List<T> list) { list.Sort(); return list; }
 }
