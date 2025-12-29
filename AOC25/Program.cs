@@ -6,12 +6,14 @@ using Day2 = AOC25.Day2;
 using Day3 = AOC25.Day3;
 using Day4 = AOC25.Day4;
 using Day5 = AOC25.Day5;
+using Day6 = AOC25.Day6;
 
 //SolveDay1();
 //SolveDay2();
 //SolveDay3();
 //SolveDay4();
-SolveDay5();
+//SolveDay5();
+SolveDay6();
 
 
 static void SolveDay1()
@@ -58,6 +60,16 @@ static void SolveDay5()
 {
     IPuzzleInput input = PuzzleInput.Create(5);
     var (part1, part2) = Day5.Puzzle.Solve(input);
+    Console.WriteLine($"""
+    Part 1:  {part1}
+    Part 2:  {part2}
+    """);
+}
+
+static void SolveDay6()
+{
+    IPuzzleInput input = PuzzleInput.Create(6);
+    var (part1, part2) = Day6.Puzzle.Solve(input);
     Console.WriteLine($"""
     Part 1:  {part1}
     Part 2:  {part2}
