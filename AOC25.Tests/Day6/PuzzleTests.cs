@@ -8,11 +8,11 @@ public class PuzzleTests
     [Fact]
     public void SampleFileProducesExpectedResults()
     {
-        var input = PuzzleInput.Create(5, sample: true);
+        var input = PuzzleInput.Create(6, sample: true);
 
         var (part1, part2) = Puzzle.Solve(input);
 
-        Assert.Equal(0, part1);
+        Assert.Equal(4277556, part1);
         Assert.Equal(0, part2);
     }
 }
