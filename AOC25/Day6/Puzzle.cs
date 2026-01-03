@@ -16,82 +16,88 @@ public static class Puzzle
             StringSplitOptions.RemoveEmptyEntries |
             StringSplitOptions.TrimEntries;
 
-        var lines = puzzleInput.ReadInput().Select(static line => line.Split(' ', TrimAndRemoveEmptyEntries)).ToArray();
-
-        var rows = lines.Length;
+        var lines = puzzleInput.ReadInput()
+            .Select(static line => line.Split(' ', TrimAndRemoveEmptyEntries))
+            .ToArray();
         var cols = lines[^1].Length;
 
-        long part1 = 0;
-        for (int col = 0; col < cols; col++)
-        {
-            Func<long, long, long> operation = lines[^1][col] switch
-            {
-                "+" => Add,
-                "*" => Multiply,
-                _ => NoOp
-            };
+        long result = 0;
+        for (int col = 0; col < cols; col++) { result += lines.ComputeColumnTotal(col); }
 
-            part1 += lines[..^1]
-                .Select(row => long.Parse(row[col]))
-                .Aggregate((total, value) => operation(total, value));
+        return result;
+    }
+
+    private static long ComputeColumnTotal(this string[][] lines, int col)
+    {
+        char operation = lines[^1][col][0];
+
+        long result = 0;
+
+        foreach (var row in lines[..^1])
+        {
+            long value = long.Parse(row[col]);
+            result = operation switch
+            {
+                _ when result == 0 => value,
+                '+' => result + value,
+                '*' => result * value,
+                _ => result
+            };
         }
 
-        return part1;
+        return result;
     }
 
     private static long SolvePart2(IPuzzleInput puzzleInput)
     {
-        long part2 = 0;
-
-        // read the input as a grid of chars
         var grid = puzzleInput.ReadInput()
             .Select(line => line.ToCharArray())
             .ToArray();
-
-        var rows = grid.Length;
         var cols = grid[0].Length;
 
-        char currentSymbol = '+';
-        long result = 0;
+        long grandTotal = 0;
         for (int col = 0; col < cols; col++)
         {
-            char symbol = grid[^1][col];
-            if (symbol == '+' || symbol == '*')
+            char operation = grid.GetOperation(col);
+            long total = 0;
+            foreach (var number in grid.GetColumnNumbers(col))
             {
-                part2 += result;
-                currentSymbol = symbol;
-                result = (symbol == '+') ? 0 : 1;
+                if (number == 0) { continue; }
+                total = operation switch
+                {
+                    _ when total == 0 => number,
+                    '+' => total + number,
+                    '*' => total * number,
+                    _ => total
+                };
+                col++;
             }
 
-            long colValue = grid.GetColumnValue(col);
-            if (colValue == 0) { continue; }
-
-            switch (currentSymbol)
-            {
-                case '+': result += colValue; break;
-                case '*': result *= colValue; break;
-            }
+            grandTotal += total;
         }
-        part2 += result;
 
-        return part2;
+        return grandTotal;
     }
 
-    private static long GetColumnValue(this char[][] grid, int col)
+    static bool IsOperation(this char symbol) => symbol is '+' or '*';
+
+    extension(char[][] grid)
     {
-        long value = 0;
-        foreach (var row in grid[..^1])
+        private char GetOperation(int col) => grid[^1][col];
+
+        private IEnumerable<long> GetColumnNumbers(int startingCol)
         {
-            if (char.IsDigit(row[col]))
+            var cols = grid[^1].Length;
+            for (var col = startingCol; col < cols; col++)
             {
-                value = (value * 10) + (row[col] - '0');
+                if (col > startingCol && grid.GetOperation(col).IsOperation()) { yield break; }
+                yield return grid.GetColumnNumber(col);
             }
         }
-        return value;
+
+        private long GetColumnNumber(int col) => grid[..^1]
+            .Select(row => row[col])
+            .Where(char.IsDigit)
+            .Aggregate(0L, (acc, ch) => (acc * 10) + (ch - '0'));
     }
-
-
-    private static long NoOp(long a, long b) => 0;
-    private static long Add(long a, long b) => a + b;
-    private static long Multiply(long a, long b) => a * b;
 }
