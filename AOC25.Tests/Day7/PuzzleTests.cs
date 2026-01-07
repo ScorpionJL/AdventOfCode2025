@@ -12,7 +12,7 @@ public class PuzzleTests
 
         var (part1, part2) = Puzzle.Solve(input);
 
-        Assert.Equal(0, part1);
+        Assert.Equal(21, part1);
         Assert.Equal(0, part2);
     }
 }

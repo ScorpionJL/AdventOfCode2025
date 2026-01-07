@@ -23,3 +23,8 @@ public static class PuzzleInput
     public static IPuzzleInput Create(int day, bool sample = false) =>
         new FileInput($@"day{day}\input{(sample ? "-sample" : "")}.txt");
 }
+
+public static class IPuzzleInputExtensions
+{
+    public static char[][] ReadInputAsGrid(this IPuzzleInput puzzleInput) => [.. puzzleInput.ReadInput().Select(static line => line.ToCharArray())];
+}
